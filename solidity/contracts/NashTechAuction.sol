@@ -24,7 +24,7 @@ contract NashTechAuction {
         require(now <= auctionEnd);
         require(msg.value > currentHighestBid);
         
-        if(currentHighestBidder != 0) {
+        if (currentHighestBidder != 0) {
             pendingReturns[currentHighestBidder] += currentHighestBid;
         }
         
@@ -35,9 +35,9 @@ contract NashTechAuction {
     
     function withdraw() public returns (bool){
         uint amount = pendingReturns[msg.sender];
-        if(amount > 0){
+        if (amount > 0){
             pendingReturns[msg.sender] = 0;
-            if(!msg.sender.send(amount)){
+            if (!msg.sender.send(amount)){
                 pendingReturns[msg.sender] = amount;
                 return false;
             }
