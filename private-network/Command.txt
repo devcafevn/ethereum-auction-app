@@ -1,0 +1,18 @@
+geth init .\genegis.json --datadir chaindata
+
+geth --datadir .\chaindata
+
+get --datadir .\chaindata --nodiscover
+
+geth --datadir .\chaindata --nodiscover --rpc --rpccorsdomain="chrome-extension://nkbihfbeogaeaoehlefn
+kodbefgpgknn"
+
+geth --datadir .\chaindata --nodiscover --rpc --rpccorsdomain="chrome-extension://nkbihfbeogaeaoehlefn
+kodbefgpgknn" --ws --wsorigins *
+
+get attach
+
+
+In the console
+miner.setEtherbase(eth.accounts[0]);
+miner.start(1);
