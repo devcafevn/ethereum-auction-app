@@ -1,0 +1,178 @@
+<!doctype>
+<html>
+
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script type="text/javascript" src="js/web3.min.js"></script>
+
+</head>
+<body>
+  <h2>Highest Bid: <span id="highestBid">0</span> ether</h2>
+   
+  <form class="form-inline">
+		<label class="sr-only" for="inlineFormInputName2">Your private key</label>
+		<input type="text" class="form-control mb-2 mr-sm-2" id="privateKey">
+    <button id="importAccount" type="button" class="btn btn-primary mb-2">Submit</button>
+  </form>
+
+  <div>
+    <p>Current Account: <span id="currentAccount"></span></p>
+    <p>Current Account Balance: <span id="currentAccountBalance"></span></p>
+  </div>
+  <script type="text/javascript">
+   
+   var web3 = new Web3(Web3.givenProvider || "ws://localhost:8546");
+    
+    var abi = [
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "benificiary",
+        "outputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [],
+        "name": "bid",
+        "outputs": [],
+        "payable": true,
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [],
+        "name": "auctionEnd",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [],
+        "name": "withdraw",
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "currentHighestBidder",
+        "outputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "currentHighestBid",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "name": "_biddingTime",
+            "type": "uint256"
+          },
+          {
+            "name": "_benificiary",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "name": "bidder",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "HighestBidIncreased",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "name": "winner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "AuctionEnded",
+        "type": "event"
+      }
+    ];
+    
+    var nashTectAuctionContract = new web3.eth.Contract(abi, '0x874eE283699637B76194A07017b70784D154D329');
+    nashTectAuctionContract.events.HighestBidIncreased(null, function(error, result){
+      if (!error) {
+        document.getElementById("highestBid").innerText = web3.utils.fromWei(result.returnValues.amount, 'ether');
+      }
+    });
+    var currentAccount;
+  
+    $("#importAccount").click(function(){
+      var privateKey = $("#privateKey").val();
+      currentAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
+      $("#currentAccount").text(currentAccount.address);
+      var balance = 0;
+      web3.eth.getBalance(currentAccount.address).then(function(data){
+        balance = web3.utils.fromWei(data, 'ether');
+      })
+      $("#currentAccountBalance").text(balance);
+    });
+  
+  </script>
+</body>
+</html>
+
