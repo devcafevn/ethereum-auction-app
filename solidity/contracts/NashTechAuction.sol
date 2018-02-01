@@ -33,11 +33,11 @@ contract NashTechAuction {
         HighestBidIncreased(msg.sender, msg.value);
     }
     
-    function withdraw() public returns (bool){
+    function withdraw() public returns (bool) {
         uint amount = pendingReturns[msg.sender];
-        if (amount > 0){
+        if (amount > 0) {
             pendingReturns[msg.sender] = 0;
-            if (!msg.sender.send(amount)){
+            if (!msg.sender.send(amount)) {
                 pendingReturns[msg.sender] = amount;
                 return false;
             }

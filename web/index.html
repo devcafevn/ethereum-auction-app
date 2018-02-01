@@ -1,6 +1,5 @@
 <!doctype>
 <html>
-
 <head>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
@@ -8,20 +7,43 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 <script type="text/javascript" src="js/web3.min.js"></script>
-
 </head>
 <body>
-  <h2>Highest Bid: <span id="highestBid">0</span> ether</h2>
-   
-  <form class="form-inline">
-		<label class="sr-only" for="inlineFormInputName2">Your private key</label>
-		<input type="text" class="form-control mb-2 mr-sm-2" id="privateKey">
-    <button id="importAccount" type="button" class="btn btn-primary mb-2">Submit</button>
-  </form>
+  <div class="container text-center">
+    <h1>Online Auction Application on Ethereum</h1>
+    <p><img src="img/devcafe_logo.jpg" width="150px" height="150px"></p>
+    <h5>Current highest bid: <span id="highestBid">0</span> ether</h5>
+    <h5>Bidder: <span id="highestBidder"></span></h5>
 
-  <div>
-    <p>Current Account: <span id="currentAccount"></span></p>
-    <p>Current Account Balance: <span id="currentAccountBalance"></span></p>
+    <hr>
+
+    <h4>Your account</h4>
+    <form class="form-inline justify-content-center">
+      <div class="form-group mb-2">
+        <label for="privateKey" class="sr-only">Your private key</label>
+        <input type="text" placeholder="private key" class="form-control mb-2 mr-sm-2" id="privateKey">  
+      </div>
+      <div class="form-group mb-2">
+          <button id="importAccount" type="button" class="btn btn-primary mb-2">Import</button>
+      </div>
+    </form>
+
+    <div id="yourAccount" class="d-none">
+      <div>
+        Your Account Address: <span id="yourAccountAddress"></span> <br>
+        Your Account Balance: <span id="yourAccountBalance"></span>
+      </div>
+      <form class="form-inline justify-content-center">
+        <div class="form-group mb-2">
+          <label for="bitAmount" class="sr-only">Your private key</label>
+          <input type="text" placeholder="bit amount" class="form-control mb-2 mr-sm-2" id="bitAmount">  
+        </div>
+        <div class="form-group mb-2">
+            <button id="submitBid" type="button" class="btn btn-primary mb-2">Bid</button>
+        </div>
+      </form>
+      <div id="progress"></div>
+    </div>
   </div>
   <script type="text/javascript">
    
@@ -153,23 +175,84 @@
       }
     ];
     
-    var nashTectAuctionContract = new web3.eth.Contract(abi, '0x874eE283699637B76194A07017b70784D154D329');
+    var nashTectAuctionContract = new web3.eth.Contract(abi, '0x46b24fd49d8d10a9a8491dab19b6e10161def2d4');
+
+    // subcrible to HighestBidIncreased event
     nashTectAuctionContract.events.HighestBidIncreased(null, function(error, result){
       if (!error) {
-        document.getElementById("highestBid").innerText = web3.utils.fromWei(result.returnValues.amount, 'ether');
+        udpateCurrentBid(result.returnValues.amount);
+        updateCurrentBidder(result.returnValues.bidder);
       }
     });
-    var currentAccount;
-  
+
+    //get current highest bid
+    nashTectAuctionContract.methods.currentHighestBid().call().then(function(amount) {
+      udpateCurrentBid(amount)
+    });
+
+    //get current highest bidder
+    nashTectAuctionContract.methods.currentHighestBidder().call().then(function(address) {
+      updateCurrentBidder(address)
+    });
+
+    function udpateCurrentBid(amount, address){
+      document.getElementById("highestBid").innerText = web3.utils.fromWei(amount, 'ether');
+    }
+
+    function updateCurrentBidder(address){
+      document.getElementById("highestBidder").innerText = address
+    }
+
+    var yourAccount;
     $("#importAccount").click(function(){
       var privateKey = $("#privateKey").val();
-      currentAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
-      $("#currentAccount").text(currentAccount.address);
-      var balance = 0;
-      web3.eth.getBalance(currentAccount.address).then(function(data){
-        balance = web3.utils.fromWei(data, 'ether');
-      })
-      $("#currentAccountBalance").text(balance);
+      yourAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
+
+      $("#yourAccount").removeClass("d-none");
+      $("#yourAccountAddress").text(yourAccount.address);
+
+      web3.eth.getBalance(yourAccount.address).then(function(data){
+        var balance = web3.utils.fromWei(data, 'ether');
+        $("#yourAccountBalance").text(balance);
+      })     
+    });
+
+    $("#submitBid").click(function(){
+      var bitAmount = web3.utils.toWei($("#bitAmount").val(), 'ether');
+      var bidMethod = nashTectAuctionContract.methods.bid();
+      var encodedABI = bidMethod.encodeABI();
+
+      var tx = {
+        from: yourAccount.address,
+        to: nashTectAuctionContract._address,
+        gas: 2100000,
+        value: bitAmount,
+        data: encodedABI
+      }
+
+      yourAccount.signTransaction(tx).then(function(signedTx){
+        var tran = web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        $("#progress").text("Sending ...")
+
+        tran.on('transactionHash', hash => {
+          console.log('hash');
+          console.log(hash);
+        });
+
+        tran.on('receipt', receipt => {
+          console.log('reciept');
+          console.log(receipt);
+          $("#progress").text(receipt)
+        });
+
+        tran.on('error', error => {
+          console.log('error');
+          console.log(error);
+          $("#progress").text(error);
+        });
+      }).catch(function(error){
+        console.log(error)
+      });
     });
   
   </script>

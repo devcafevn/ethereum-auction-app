@@ -1,0 +1,1 @@
+When using privateKeyToAccount. The private key should have 0x prefix. So add it if needed.
