@@ -6,7 +6,7 @@ https://geth.ethereum.org/downloads
 
 Create a local folder. Let say C:\private-eth. Copy the genesis.json to that folder. Then open PowerShell Windows in that folder. Type
 
-> geth init .\genegis.json --datadir chaindata
+> geth init .\genesis.json --datadir chaindata
 
 Then start geth
 
