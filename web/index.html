@@ -1,6 +1,7 @@
 <!doctype>
 <html>
 <head>
+  <title>Auction - DEV Cafe</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -12,9 +13,9 @@
   <div class="container text-center">
     <h1>Online Auction Application on Ethereum</h1>
     <p><img src="img/devcafe_logo.jpg" width="150px" height="150px"></p>
-    <h5>Current highest bid: <span id="highestBid">0</span> ether</h5>
-    <h5>Bidder: <span id="highestBidder"></span></h5>
-
+    <h5>Current highest bid: <span id="highestBid">0</span> ether, <span id="highestBidder"></span></h5>
+    <h5>Auction will end at: <span id="auctionEndTime"></span></h5>
+    <h5>Beneficiary address: <span id="beneficiaryAddress"></span></h5>
     <hr>
 
     <h4>Your account</h4>
@@ -50,132 +51,146 @@
    var web3 = new Web3(Web3.givenProvider || "ws://localhost:8546");
     
     var abi = [
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "benificiary",
-        "outputs": [
-          {
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "constant": false,
-        "inputs": [],
-        "name": "bid",
-        "outputs": [],
-        "payable": true,
-        "stateMutability": "payable",
-        "type": "function"
-      },
-      {
-        "constant": false,
-        "inputs": [],
-        "name": "auctionEnd",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "constant": false,
-        "inputs": [],
-        "name": "withdraw",
-        "outputs": [
-          {
-            "name": "",
-            "type": "bool"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "currentHighestBidder",
-        "outputs": [
-          {
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "currentHighestBid",
-        "outputs": [
-          {
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "name": "_biddingTime",
-            "type": "uint256"
-          },
-          {
-            "name": "_benificiary",
-            "type": "address"
-          }
-        ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": false,
-            "name": "bidder",
-            "type": "address"
-          },
-          {
-            "indexed": false,
-            "name": "amount",
-            "type": "uint256"
-          }
-        ],
-        "name": "HighestBidIncreased",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": false,
-            "name": "winner",
-            "type": "address"
-          },
-          {
-            "indexed": false,
-            "name": "amount",
-            "type": "uint256"
-          }
-        ],
-        "name": "AuctionEnded",
-        "type": "event"
-      }
-    ];
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "beneficiary",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "auctionEndTime",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "currentHighestBidder",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "currentHighestBid",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_biddingTime",
+          "type": "uint256"
+        },
+        {
+          "name": "_beneficiary",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "bidder",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "HighestBidIncreased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "winner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "AuctionEnded",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "bid",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "auctionEnd",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ];
     
-    var nashTectAuctionContract = new web3.eth.Contract(abi, '0xd98ba5b4e8392dc4ad4bcc780a021831af8aaa83');
+    var nashTectAuctionContract = new web3.eth.Contract(abi, '0x12175e97c6b137c647f04878997ea717466786b9');
 
     // subcrible to HighestBidIncreased event
     nashTectAuctionContract.events.HighestBidIncreased(null, function(error, result){
@@ -183,6 +198,14 @@
         udpateCurrentBid(result.returnValues.amount);
         updateCurrentBidder(result.returnValues.bidder);
       }
+    });
+
+    nashTectAuctionContract.methods.beneficiary().call().then(function(address) {
+      document.getElementById("beneficiaryAddress").innerText = address;
+    });
+
+    nashTectAuctionContract.methods.auctionEndTime().call().then(function(time) {
+      document.getElementById("auctionEndTime").innerText = new Date(time*1000).toString();
     });
 
     //get current highest bid
@@ -194,6 +217,7 @@
     nashTectAuctionContract.methods.currentHighestBidder().call().then(function(address) {
       updateCurrentBidder(address)
     });
+
 
     function udpateCurrentBid(amount, address){
       document.getElementById("highestBid").innerText = web3.utils.fromWei(amount, 'ether');

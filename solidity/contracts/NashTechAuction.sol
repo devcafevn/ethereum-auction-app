@@ -3,13 +3,12 @@ pragma solidity ^0.4.17;
 contract NashTechAuction {
     
     address public beneficiary;
-    uint public auctionEnd;
+    uint public auctionEndTime;
     
     address public currentHighestBidder;
     uint public currentHighestBid;
     
-    mapping(address => uint) pendingReturns;
-    
+    mapping(address => uint) pendingReturns;    
     bool ended = false;
     
     event HighestBidIncreased(address bidder, uint amount);
@@ -17,14 +16,14 @@ contract NashTechAuction {
     
     function NashTechAuction(uint _biddingTime, address _beneficiary) public {
         beneficiary = _beneficiary;
-        auctionEnd = now + _biddingTime;
+        auctionEndTime = now + _biddingTime;
     }
     
     function bid() public payable {
         // The keyword payable is required for the function to
         // be able to receive Ether.
 
-        require(now <= auctionEnd);
+        require(now <= auctionEndTime);
         require(msg.value > currentHighestBid);
         
         if (currentHighestBidder != 0) {
@@ -53,7 +52,7 @@ contract NashTechAuction {
     }
     
     function auctionEnd() public {
-        require(now >= auctionEnd);
+        require(now >= auctionEndTime);
         require(!ended);
         
         ended = true;
