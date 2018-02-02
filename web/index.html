@@ -175,7 +175,7 @@
       }
     ];
     
-    var nashTectAuctionContract = new web3.eth.Contract(abi, '0x46b24fd49d8d10a9a8491dab19b6e10161def2d4');
+    var nashTectAuctionContract = new web3.eth.Contract(abi, '0xd98ba5b4e8392dc4ad4bcc780a021831af8aaa83');
 
     // subcrible to HighestBidIncreased event
     nashTectAuctionContract.events.HighestBidIncreased(null, function(error, result){
@@ -242,7 +242,7 @@
         tran.on('receipt', receipt => {
           console.log('reciept');
           console.log(receipt);
-          $("#progress").text(receipt)
+          $("#progress").text("")
         });
 
         tran.on('error', error => {
