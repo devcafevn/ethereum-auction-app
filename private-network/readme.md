@@ -13,7 +13,7 @@ Then start geth
 > geth --datadir .\chaindata --nodiscover --rpc --rpccorsdomain "\*" --ws --wsorigins "\*" --networkid 15
 
 Open another PowserShell Windows
-> get attach
+> geth attach ipc:\\.\pipe\geth.ipc
 
 In the console
 > personal.newAccount();
