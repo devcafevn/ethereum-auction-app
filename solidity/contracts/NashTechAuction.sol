@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.22;
 
 contract NashTechAuction {
     
@@ -14,7 +14,7 @@ contract NashTechAuction {
     event HighestBidIncreased(address bidder, uint amount);
     event AuctionEnded(address winner, uint amount);
     
-    function NashTechAuction(uint _biddingTime, address _beneficiary) public {
+    constructor(uint _biddingTime, address _beneficiary) public {
         beneficiary = _beneficiary;
         auctionEndTime = now + _biddingTime;
     }
@@ -32,7 +32,7 @@ contract NashTechAuction {
         
         currentHighestBidder = msg.sender;
         currentHighestBid = msg.value;
-        HighestBidIncreased(msg.sender, msg.value);
+        emit HighestBidIncreased(msg.sender, msg.value);
     }
     
     function withdraw() public returns (bool) {
@@ -56,7 +56,7 @@ contract NashTechAuction {
         require(!ended);
         
         ended = true;
-        AuctionEnded(currentHighestBidder, currentHighestBid);
+        emit AuctionEnded(currentHighestBidder, currentHighestBid);
         
         beneficiary.transfer(currentHighestBid);
     }
